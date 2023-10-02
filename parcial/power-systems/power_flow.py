@@ -85,6 +85,61 @@ def generate_matrices(vector):
     # print(matrices)
     return matrices
 
+def generic_powers(voltages, angles, conductances, susceptances):
+    """
+    Returns two functions previously filled with the corresponding values for active
+    and reactive powers for Newton Raphson method.
+
+    Parameters:
+    -----------
+    voltages: array
+        Corresponding buses voltages connected through lines with the desired bus.
+    angles: array
+        Corresponding angles between the desired bus and each connected bus through
+        a line.
+    conductances: array
+        Corresponding conductance for the lines connecting the desired bus with the
+        rest of the buses.
+    susceptances: array
+        Corresponding susceptance for the lines connecting the desired bus with the
+        rest of the buses.
+    """
+    V, theta = 1, 0
+    G, B = 0
+    active_power = 0
+    active_powers = []
+    reactive_power = 0
+    reactive_powers = []
+    bars = len(voltages)
+    for p_index, position in bars:
+        for p_sub_index, sub_position in bars:
+            active_power = active_power + (
+                V[p_index]*V[p_sub_index]*(
+                    G[p_index][p_sub_index]*np.cos(theta[p_index][p_sub_index]) + (
+                    B[p_index][p_sub_index]*np.sin(theta[p_index][p_sub_index]))))
+            if p_sub_index == bars:
+                active_powers.append(active_power)
+                active_power = 0
+            else:
+                continue
+    for q_index, position in bars:
+        for q_sub_index, sub_position in bars:
+            reactive_power = reactive_power + (
+                V[q_index]*V[q_sub_index]*(
+                    G[q_index][q_sub_index]*np.cos(theta[q_index][q_sub_index]) + (
+                    B[q_index][q_sub_index]*np.sin(theta[q_index][q_sub_index]))))
+            if q_sub_index == bars:
+                reactive_powers.append(reactive_power)
+                reactive_power = 0
+            else:
+                continue
+
+def generic_jacobian():
+    """
+    Returns 
+    """
+
+
 print(
     """
     Por favor seleccione el archivo de excel al cual desea aplicar el método de
@@ -106,18 +161,5 @@ power_system = {
     "generators" : matrices_with_contents[6]
 }
 
-# apparent_power = matrices_with_contents[0][0][0]
-# print(apparent_power)
-# power_system = {
-#     "basis" : contents[0][0][0],
-#     "buses" : contents[1][0],
-#     "lines" : contents[0],
-#     "transformers" : contents[0],
-#     "loads" : contents[0],
-#     "capacitors" : contents[0],
-#     "generators" : contents[0]
-#     }
-# print(power_system)
 
-# np.delete(contents, 0, 0)
 # print(np.cos(3.14))
