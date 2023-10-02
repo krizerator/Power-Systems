@@ -56,18 +56,18 @@ def parse_to_dataframe(excel_file):
     vector = []
     for item, position in enumerate(contents):
         try:
-            print(item, position)
+            # print(item, position)
             vector.append(data.parse(contents[item]))
-            print(vector)
+            # print(vector)
         except ValueError:
             print(f"ValueError: Expected DataFrame {contents[item]} not found")
             sys.exit()
-    print(vector)
+    # print(vector)
     return vector
 
 def generate_matrices(vector):
     """
-    Converts a set of DataFrames into individual matrices.
+    Converts an array of DataFrames into individual matrices.
 
     Parameters
     ----------
@@ -94,8 +94,18 @@ print(
 input("Presione enter para continuar.")
 excel = open_file()
 dataframes = parse_to_dataframe(excel)
-# matrices_with_contents = generate_matrices(dataframes)
-# print(matrices_with_contents)
+print(dataframes[0], "\n", dataframes[1], "\n", dataframes[2])
+matrices_with_contents = generate_matrices(dataframes)
+power_system = {
+    "basis" : matrices_with_contents[0][0][0],
+    "buses" : matrices_with_contents[1],
+    "lines" : matrices_with_contents[2],
+    "transformers" : matrices_with_contents[3],
+    "loads" : matrices_with_contents[4],
+    "capacitors" : matrices_with_contents[5],
+    "generators" : matrices_with_contents[6]
+}
+
 # apparent_power = matrices_with_contents[0][0][0]
 # print(apparent_power)
 # power_system = {
