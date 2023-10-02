@@ -198,7 +198,8 @@ def partial_derivative(expression, respect_with):
     """
     a
     """
-
+    derivative = sp.Derivative(expression, respect_with).doit()
+    derivative.evalf(subs={})
     return
 
 def generic_jacobian(iteration):
