@@ -28,7 +28,7 @@ potencia basándose en un valor de tolerancia establecido.
 import pandas as pd
 import numpy as np
 from multiprocessing import Pool
-# from power-systems import power_flow
+from power-systems import power_flow
 
 # ------------------------------------------------------------ #
 # Creación de DataFrames a partir de un archivo en formato .xlsx
@@ -96,3 +96,8 @@ for i in range(0, 17):
 #           iv. Resolver para delta_x con U*delta_x = y
 #       d. Hallar theta y V siguientes, x_(k+1) = x_(k) + dlta_x
 #       e. Calcular el mismatch
+
+# excel = power_flow.open_file()
+# dataframes = power_flow.parse_to_dataframe(excel)
+# matrices_with_contents = power_flow.generate_matrices(dataframes)
+# print(matrices_with_contents[0][0][0])

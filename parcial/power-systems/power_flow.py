@@ -1,8 +1,10 @@
 import sys
 import tkinter
 from tkinter import filedialog as fd
+import sympy as sp
 import numpy as np
 import pandas as pd
+np.set_printoptions(threshold=sys.maxsize)
 
 def open_file():
     """
@@ -85,31 +87,88 @@ def generate_matrices(vector):
     # print(matrices)
     return matrices
 
-def generic_powers(voltages, angles, conductances, susceptances):
+def add_lines_items_to_matrix(matrix, data):
+    """
+    a
+    """
+    for index, position in enumerate(data):
+        bus_1 = int(data[index][0])
+        bus_2 = int(data[index][1])
+        impedance = complex(data[index][2],data[index][3])
+        susceptance = complex(0,data[index][4])
+        admittance = 1/impedance + susceptance/2
+        matrix[bus_1-1][bus_2-1] = matrix[bus_1-1][bus_2-1] + admittance
+        matrix[bus_2-1][bus_1-1] = matrix[bus_2-1][bus_1-1] + admittance
+    return matrix
+
+def add_transformers_items_to_matrix(matrix, data):
+    """
+    a
+    """
+    for index, position in enumerate(data):
+        bus_1 = int(data[index][0])
+        bus_2 = int(data[index][1])
+        impedance = complex(data[index][2],data[index][3])
+        admittance_cc = 1/impedance
+        bus_tap = data[index][5]
+        parameter_A = admittance_cc/bus_tap
+        parameter_B = admittance_cc/bus_tap*(1/bus_tap-1)
+        parameter_C = admittance_cc*(bus_tap-1)/bus_tap
+        admittance = parameter_A + (parameter_B + parameter_C)/2
+        matrix[bus_1-1][bus_2-1] = matrix[bus_1-1][bus_2-1] + admittance
+        matrix[bus_2-1][bus_1-1] = matrix[bus_2-1][bus_1-1] + admittance
+    return matrix
+
+def admittance_matrix(system):
+    """
+    Returns the admittance matrix for a power system.
+
+    Parameters
+    ----------
+    power_system: dict
+        Dictionary containing data necessary to determine the admittance matrix for
+        a power syste.
+
+    Returns
+    -------
+    matrix
+        The admittance matrix for the specified power system
+    """
+    buses = system['buses']
+    lines = system['lines']
+    transformers = system['transformers']
+    matrix = np.zeros(shape=(len(buses), len(buses)), dtype=np.complex_)
+    matrix = add_lines_items_to_matrix(matrix, lines)
+    matrix = add_transformers_items_to_matrix(matrix, transformers)
+    return matrix
+
+def vector_index():
+    """
+    Returns a vector for voltages and angles of a power system for a Newton Raphson
+    iteration.
+
+    Parameters
+    ----------
+    s
+    """
+    return
+
+def generic_powers(system, voltages, angles):
     """
     Returns two functions previously filled with the corresponding values for active
     and reactive powers for Newton Raphson method.
 
-    Parameters:
-    -----------
-    voltages: array
-        Corresponding bus voltages connected through lines with the desired bus.
-    angles: array
-        Corresponding angles between the desired bus and each connected bus through
-        a line.
-    conductances: array
-        Corresponding conductance for the lines connecting the desired bus with the
-        rest of the buses.
-    susceptances: array
-        Corresponding susceptance for the lines connecting the desired bus with the
-        rest of the buses.
+    Parameters
+    ----------
+    power_system: dict
+        Dictionary containing data related to parameters needed to calculate powers.
     """
-    V, theta = 1, 0
-    G, B = 0
     active_power = 0
     active_powers = []
     reactive_power = 0
     reactive_powers = []
+    buses = system['buses']
+    matrix = np.zeros(shape=(len(buses), len(buses)), dtype=np.complex_)
     bars = len(voltages)
     for p_index, position in bars:
         for p_sub_index, sub_position in bars:
@@ -133,14 +192,22 @@ def generic_powers(voltages, angles, conductances, susceptances):
                 reactive_power = 0
             else:
                 continue
+    return active_powers, reactive_powers
 
-def generic_jacobian(voltages, angles, conductances, susceptances):
+def partial_derivative(expression, respect_with):
+    """
+    a
+    """
+
+    return
+
+def generic_jacobian(iteration):
     """
     Returns the jacobian for a power system filled with the corresponding values
     for the partial derivatives.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     voltages: array
         Bus voltages for the power system.
     angles: array
@@ -154,13 +221,14 @@ def generic_jacobian(voltages, angles, conductances, susceptances):
     angles = angles
     conductances = conductances
     susceptances = susceptances
+    return
 
-def iterative(voltages, angles, Jacobian, active_powers, reactive_powers, tolerance):
+def iterative(iteration):
     """
     Returns the approximate value for a Newton Raphson power flow solution.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     voltages: array
         Corresponding buses voltages connected through lines with the desired bus.
     angles: array
@@ -177,6 +245,7 @@ def iterative(voltages, angles, Jacobian, active_powers, reactive_powers, tolera
     angles = angles
     conductances = conductances
     susceptances = susceptances
+    return
 
 print(
     """
@@ -198,7 +267,8 @@ power_system = {
     "capacitors" : matrices_with_contents[5],
     "generators" : matrices_with_contents[6]
 }
-for i, element in enumerate(power_system):
-    print(power_system[f"{element}"])
-print(dataframes)
+admittance_matrix(power_system)
+# for i, element in enumerate(power_system):
+    # print(power_system[f"{element}"])
+# print(dataframes)
 # print(np.cos(3.14))
