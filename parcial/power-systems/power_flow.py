@@ -93,7 +93,7 @@ def generic_powers(voltages, angles, conductances, susceptances):
     Parameters:
     -----------
     voltages: array
-        Corresponding buses voltages connected through lines with the desired bus.
+        Corresponding bus voltages connected through lines with the desired bus.
     angles: array
         Corresponding angles between the desired bus and each connected bus through
         a line.
@@ -134,11 +134,49 @@ def generic_powers(voltages, angles, conductances, susceptances):
             else:
                 continue
 
-def generic_jacobian():
+def generic_jacobian(voltages, angles, conductances, susceptances):
     """
-    Returns 
-    """
+    Returns the jacobian for a power system filled with the corresponding values
+    for the partial derivatives.
 
+    Parameters:
+    -----------
+    voltages: array
+        Bus voltages for the power system.
+    angles: array
+        Angles between buses.
+    conductances: array
+        Conductances for the lines.
+    susceptances: array
+        Susceptances for the lines.
+    """
+    voltages = voltages
+    angles = angles
+    conductances = conductances
+    susceptances = susceptances
+
+def iterative(voltages, angles, Jacobian, active_powers, reactive_powers, tolerance):
+    """
+    Returns the approximate value for a Newton Raphson power flow solution.
+
+    Parameters:
+    -----------
+    voltages: array
+        Corresponding buses voltages connected through lines with the desired bus.
+    angles: array
+        Corresponding angles between the desired bus and each connected bus through
+        a line.
+    conductances: array
+        Corresponding conductance for the lines connecting the desired bus with the
+        rest of the buses.
+    susceptances: array
+        Corresponding susceptance for the lines connecting the desired bus with the
+        rest of the buses.
+    """
+    voltages = voltages
+    angles = angles
+    conductances = conductances
+    susceptances = susceptances
 
 print(
     """
@@ -149,7 +187,7 @@ print(
 input("Presione enter para continuar.")
 excel = open_file()
 dataframes = parse_to_dataframe(excel)
-print(dataframes[0], "\n", dataframes[1], "\n", dataframes[2])
+# print(dataframes[0], "\n", dataframes[1], "\n", dataframes[2])
 matrices_with_contents = generate_matrices(dataframes)
 power_system = {
     "basis" : matrices_with_contents[0][0][0],
@@ -160,6 +198,7 @@ power_system = {
     "capacitors" : matrices_with_contents[5],
     "generators" : matrices_with_contents[6]
 }
-
-
+for i, element in enumerate(power_system):
+    print(power_system[f"{element}"])
+print(dataframes)
 # print(np.cos(3.14))
