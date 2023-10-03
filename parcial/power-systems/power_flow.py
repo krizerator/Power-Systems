@@ -96,21 +96,24 @@ def add_lines_items_to_matrix(matrix, system):
         matrix[bus_2-1][bus_1-1] -= admittance
         matrix[bus_1-1][bus_1-1] += admittance
         matrix[bus_2-1][bus_2-1] += admittance
-    # for index, position in enumerate(lines_data):
-    #     line = int(lines_data[index][0])
-    #     for sub_index, position in enumerate(buses_data):
-    #         if line-1 < sub_index and matrix[line-1][index] != 0 and line-1 != sub_index:
-    #             matrix[line-1][line-1] += matrix[line-1][index]
-    #             print(f"Data added to Y{line}{line}: ", matrix[line-1][line-1])
-    #         else:
-    #             print(f"No data added to Y{line}{line} for i-j:{line}-{sub_index+1}")
-    #             continue
-    print(matrix)
     return matrix
 
 def add_transformers_items_to_matrix(matrix, data):
     """
-    a
+    Returns the matrix with modified values based on transformers data from the
+    power system.
+
+    Parameters
+    ----------
+    matrix: matrix
+        Matrix to be filled with tolerance impedance values.
+    data: array
+        Array that contains information about the transformers admittances.
+
+    Returns
+    -------
+    matrix
+        Matrix with modified impedance entries.
     """
     for index, position in enumerate(data):
         bus_1 = int(data[index][0])
@@ -148,7 +151,7 @@ def admittance_matrix(system):
     matrix = add_transformers_items_to_matrix(matrix, transformers)
     return matrix
 
-def vector_index():
+def initial_vector():
     """
     Returns a vector for voltages and angles of a power system for a Newton Raphson
     iteration.
@@ -158,6 +161,15 @@ def vector_index():
     s
     """
     return
+
+def generic_functions():
+    Vk, Vi, Gki, Bki, theta_ki = sp.symbols('Vk, Vi, Gki, Bki, theta_ki')
+    active_power_function = Vk*Vi*(Gki*sp.cos(theta_ki)+Bki*sp.sin(theta_ki))
+    reactive_power_function = Vk*Vi*(Gki*sp.sin(theta_ki)-Bki*sp.cos(theta_ki))
+    partial_derivative_p_theta = sp.Derivative(active_power_function,theta_ki).doit()
+    partial_derivative_p_v = sp.Derivative(active_power_function,Vk).doit()
+    print(active_power_function, '\n', reactive_power_function, '\n', partial_derivative_p_theta)
+    return active_power_function, reactive_power_function
 
 def generic_powers(system, voltages, angles):
     """
@@ -169,10 +181,15 @@ def generic_powers(system, voltages, angles):
     power_system: dict
         Dictionary containing data related to parameters needed to calculate powers.
     """
-    active_power = 0
-    active_powers = []
-    reactive_power = 0
-    reactive_powers = []
+    Vk, Vi, Gki, Bki, theta_ki = sp.symbols('Vk, Vi, Gki, Bki, theta_ki')
+    active_power_function = Vk*Vi*(Gki*np.cos(theta_ki)+Bki*np.sin(theta_ki))
+    reactive_power_function = Vk*Vi*(Gki*np.sin(theta_ki)-Bki*np.cos(theta_ki))
+    active_power_function.evalf(subs={Vk:{1}, Vi:{1}, Gki:{}, Bki:{}, theta_ki:{}})
+    reactive_power_function.evalf(subs={Vk:{1}, Vi:{1}, Gki:{}, Bki:{}, theta_ki:{}})
+    # active_power = 0
+    # active_powers = []
+    # reactive_power = 0
+    # reactive_powers = []
     buses = system['buses']
     matrix = np.zeros(shape=(len(buses), len(buses)), dtype=np.complex_)
     bars = len(voltages)
@@ -275,6 +292,7 @@ power_system = {
     "generators" : matrices_with_contents[6]
 }
 admittance_matrix(power_system)
+generic_functions()
 # for i, element in enumerate(power_system):
     # print(power_system[f"{element}"])
 # print(dataframes)
