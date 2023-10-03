@@ -36,35 +36,16 @@ def parse_to_dataframe(excel_file):
     Array of DataFrames
         An array containing a set of DataFrames taken from the spreadsheet.
     """
-    # try:
     data = pd.ExcelFile(excel_file)
-    # except ValueError:
-    #     counter = 0
-    #     while ".xlsx" not in excel_file and counter <= 2:
-    #         new_input = input(
-    #             "Error: The input file must have '.xlsx' extension. "
-    #             + "Please try again.\n"
-    #             )
-    #         excel_file = new_input
-    #         counter += 1
-    #         if counter > 2:
-    #             print("Limit number of retries exceeded.")
-    #             sys.exit()
-    #         else:
-    #             continue
-    #     data = pd.ExcelFile(excel_file)
     contents = ['Basis', 'Buses', 'Lines', 'Transformers',
                 'Loads', 'Capacitors', 'Generators']
     vector = []
     for item, position in enumerate(contents):
         try:
-            # print(item, position)
             vector.append(data.parse(contents[item]))
-            # print(vector)
         except ValueError:
             print(f"ValueError: Expected DataFrame {contents[item]} not found")
             sys.exit()
-    # print(vector)
     return vector
 
 def generate_matrices(vector):
@@ -84,21 +65,47 @@ def generate_matrices(vector):
     matrices = []
     for index, position in enumerate(vector):
         matrices.append(vector[index].values)
-    # print(matrices)
     return matrices
 
-def add_lines_items_to_matrix(matrix, data):
+def add_lines_items_to_matrix(matrix, system):
     """
-    a
+    Returns the matrix with modified values based on lines data from the power
+    system.
+
+    Parameters
+    ----------
+    matrix: matrix
+        Matrix to be filled with line impedance values.
+    data: array
+        Array that contains information about the lines admittances.
+
+    Returns
+    -------
+    matrix
+        Matrix with modified impedance entries.
     """
-    for index, position in enumerate(data):
-        bus_1 = int(data[index][0])
-        bus_2 = int(data[index][1])
-        impedance = complex(data[index][2],data[index][3])
-        susceptance = complex(0,data[index][4])
+    lines_data = system['lines']
+    buses_data = system['buses']
+    for index, position in enumerate(lines_data):
+        bus_1 = int(lines_data[index][0])
+        bus_2 = int(lines_data[index][1])
+        impedance = complex(lines_data[index][2],lines_data[index][3])
+        susceptance = complex(0,lines_data[index][4])
         admittance = 1/impedance + susceptance/2
-        matrix[bus_1-1][bus_2-1] = matrix[bus_1-1][bus_2-1] + admittance
-        matrix[bus_2-1][bus_1-1] = matrix[bus_2-1][bus_1-1] + admittance
+        matrix[bus_1-1][bus_2-1] -= admittance
+        matrix[bus_2-1][bus_1-1] -= admittance
+        matrix[bus_1-1][bus_1-1] += admittance
+        matrix[bus_2-1][bus_2-1] += admittance
+    # for index, position in enumerate(lines_data):
+    #     line = int(lines_data[index][0])
+    #     for sub_index, position in enumerate(buses_data):
+    #         if line-1 < sub_index and matrix[line-1][index] != 0 and line-1 != sub_index:
+    #             matrix[line-1][line-1] += matrix[line-1][index]
+    #             print(f"Data added to Y{line}{line}: ", matrix[line-1][line-1])
+    #         else:
+    #             print(f"No data added to Y{line}{line} for i-j:{line}-{sub_index+1}")
+    #             continue
+    print(matrix)
     return matrix
 
 def add_transformers_items_to_matrix(matrix, data):
@@ -135,10 +142,9 @@ def admittance_matrix(system):
         The admittance matrix for the specified power system
     """
     buses = system['buses']
-    lines = system['lines']
     transformers = system['transformers']
     matrix = np.zeros(shape=(len(buses), len(buses)), dtype=np.complex_)
-    matrix = add_lines_items_to_matrix(matrix, lines)
+    matrix = add_lines_items_to_matrix(matrix, power_system)
     matrix = add_transformers_items_to_matrix(matrix, transformers)
     return matrix
 
@@ -194,9 +200,9 @@ def generic_powers(system, voltages, angles):
                 continue
     return active_powers, reactive_powers
 
-def partial_derivative(expression, respect_with):
+def partial_derivative(expression, respect_with, **kwargs):
     """
-    a
+    
     """
     derivative = sp.Derivative(expression, respect_with).doit()
     derivative.evalf(subs={})
