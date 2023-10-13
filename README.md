@@ -1,6 +1,6 @@
 # Power-Systems
 
-### Installation
+### Cloning repository
 
 Below are the instructions to set up the repository in your computer:
 
@@ -12,3 +12,5 @@ Below are the instructions to set up the repository in your computer:
 3. Open Terminal.
 4. Change the current working directory to the location where you want the cloned directory (i.e. `/mnt/c/Users/username/desktop/Power-Systems`.)
 5. Type ``git clone``.
+
+### Installation
